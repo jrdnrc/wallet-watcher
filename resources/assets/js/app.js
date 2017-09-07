@@ -17,7 +17,7 @@ const axios = require('axios')
 
 Vue.component('wallet', require('./components/Wallet.vue'));
 Vue.component('add-wallet', require('./components/NewWallet.vue'))
-Vue.component('address-input-list', require('./Components/AddressInputList.vue'))
+
 const app = new Vue({
     el: '#app',
 
