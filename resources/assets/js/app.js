@@ -37,6 +37,7 @@ const app = new Vue({
                 response.data.forEach(wallet => {
                     axios(`/wallet/${wallet.wallet_id}`).then(r => {
                         this.wallets.push({
+                            wallet_id: wallet.wallet_id,
                             name:      wallet.name,
                             addresses: wallet.addresses.map(a => a.address),
                             balance:   r.data.balance,

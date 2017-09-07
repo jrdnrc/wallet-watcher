@@ -17,13 +17,14 @@
             </div>
 
             <div class="col-xs-7 col-md-4" v-for="w in wallets">
-                <wallet :name="w.name"
+                <wallet :wallet_id="w.wallet_id"
+                        :name="w.name"
                         :balance="w.balance"
                         :addresses="w.addresses" />
             </div>
         </div>
 
-        <add-wallet />
+        <add-wallet v-on:wallet-added="fetchWallets" />
     </div>
 
 </div>

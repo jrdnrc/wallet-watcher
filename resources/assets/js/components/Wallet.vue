@@ -9,11 +9,37 @@
                 </a>
             </li>
         </ul>
+
+        <form>
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Address" v-model="newAddress" ref="newAddress">
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-info" v-on:click="addAddress">
+                        <i class="glyphicon glyphicon-plus"></i>
+                    </button>
+                </span>
+            </div>
+        </form>
     </div>
 </template>
 
 <script>
     export default {
-        props: ['name', 'balance', 'addresses']
+        props: ['wallet_id', 'name', 'balance', 'addresses'],
+
+        data: function () {
+            return {
+                newAddress: ''
+            }
+        },
+
+        methods: {
+            addAddress: function () {
+                axios.post(`/wallet/${this.wallet_id}/address`, { address: this.newAddress }).then(() => {
+                    this.$refs.newAddress.blur()
+                    this.newAddress = ''
+                })
+            }
+        }
     }
 </script>

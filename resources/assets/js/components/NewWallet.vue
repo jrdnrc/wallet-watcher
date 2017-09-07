@@ -59,6 +59,7 @@
 
                 axios.post('/wallet', { name: this.name, addresses: this.addresses }).then(() => {
                     this.name = ''
+                    this.$emit('wallet-added')
                     $('#new-wallet-modal').modal('hide')
                 })
             },
