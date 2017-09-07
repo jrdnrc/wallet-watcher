@@ -1,0 +1,75 @@
+---
+version: '2'
+services:
+  https-portal:
+    image: steveltn/https-portal:1.0.0
+    ports:
+    - 80:80
+    - 443:443
+    restart: always
+    links:
+    - nginx
+    environment:
+      STAGE: local
+      DOMAINS: walletwatcher.local -> http://nginx
+  nginx:
+    build:
+      context: "./docker/nginx"
+      args:
+      - PHP_UPSTREAM=php-fpm
+    volumes_from:
+    - php-fpm
+    volumes:
+    - "./docker/logs/nginx/:/var/log/nginx"
+    - "./docker/nginx/sites/:/etc/nginx/sites-available"
+    links:
+    - php-fpm
+  php-fpm:
+    depends_on:
+      - db
+    build:
+      context: "./docker/php-fpm"
+      args:
+      - INSTALL_XDEBUG=true
+    group_add:
+      - www-data
+    volumes:
+      - "./:/var/www"
+    env_file:
+      - "./.env"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+    links:
+      - db
+  php-cli:
+    depends_on:
+      - db
+    build:
+      context: "./docker/php-cli"
+      args:
+      - INSTALL_XDEBUG=true
+    group_add:
+      - www-data
+    volumes:
+      - "./:/var/www"
+    env_file:
+      - "./.env"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+    links:
+      - db
+  db:
+    image: mysql:5.7
+    environment:
+    - MYSQL_ROOT_PASSWORD=123
+    - MYSQL_USER=db_user
+    - MYSQL_PASSWORD=db_password
+    - MYSQL_DATABASE=walletwatcher_db
+    ports:
+    - 33061:3306
+    volumes:
+    - mysql_data:/var/lib/mysql
+volumes:
+  mysql_data:
