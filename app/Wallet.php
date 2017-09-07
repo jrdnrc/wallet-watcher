@@ -23,7 +23,7 @@ class Wallet extends Model
      */
     public function withAddresses(array $addresses) : Wallet
     {
-        $this->addresses()->create(
+        $this->addresses()->createMany(
             array_map(
                 function ($address) {
                     return ['address' => $address];

@@ -20,9 +20,8 @@ final class NewWalletController extends Controller
      */
     public function __invoke(NewWalletRequest $request) : Response
     {
-        $wallet = (new Wallet(['wallet_id' => uuid(), 'name' => $request->request->get('name')]))
-            ->withAddresses($request->request->get('addresses', []))
-            ->save();
+        $wallet = Wallet::create(['wallet_id' => uuid(), 'name' => $request->request->get('name')])
+            ->withAddresses($request->request->get('addresses', []));
 
         return response()->json(['wallet_id' => $wallet->wallet_id]);
     }
