@@ -66,7 +66,7 @@
 
             addAddress: function (e) {
                 if (this.newAddress.length > 0) {
-                    this.addresses.push(this.newAddress)
+                    this.addresses.push(this.newAddress.trim())
                     this.newAddress = ''
                     this.$refs.newAddress.focus()
                 }

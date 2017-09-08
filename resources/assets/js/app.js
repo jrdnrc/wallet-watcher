@@ -17,6 +17,7 @@ const axios = require('axios')
 
 Vue.component('wallet', require('./components/Wallet.vue'));
 Vue.component('add-wallet', require('./components/NewWallet.vue'))
+Vue.component('draggable', require('vuedraggable'))
 
 const app = new Vue({
     el: '#app',
@@ -26,26 +27,45 @@ const app = new Vue({
     },
 
     data: {
-        heading: 'Hello!',
         wallets: []
     },
 
     methods: {
         fetchWallets: function () {
             this.wallets.length = 0
-            axios('/wallet').then(response => {
-                response.data.forEach(wallet => {
-                    axios(`/wallet/${wallet.wallet_id}`).then(r => {
-                        this.wallets.push({
-                            wallet_id: wallet.wallet_id,
-                            name:      wallet.name,
-                            addresses: wallet.addresses.map(a => a.address),
-                            balance:   r.data.balance,
-                            fiat:      r.data.fiat
-                        })
-                    })
-                })
-            }).catch(error => console.log(error))
+
+            const pushToWallets = response => {
+                console.log(JSON.parse(JSON.stringify(response.data)))
+                response.data.forEach(wallet => this.wallets.push(wallet))
+            }
+
+
+            axios('/wallet').then(pushToWallets).catch(error => console.log(error))
+        },
+
+        removeWallet: function(wallet_id) {
+            this.wallets = this.wallets.filter(w => w.wallet_id !== wallet_id)
+        }
+    },
+
+    computed: {
+        title: {
+            get() {
+                if (this.wallets.length > 0) {
+                    document.title = this.wallets[0].balance
+                }
+
+                return document.title
+            },
+            set(v) {
+                document.title = v
+            }
+            // (function titleScroller(text) {
+            //     document.title = text;
+            //     setTimeout(function () {
+            //         titleScroller(text.substr(1) + text.substr(0, 1));
+            //     }, 500);
+            // }(" Nature dff ssfd "));
         }
     }
 });

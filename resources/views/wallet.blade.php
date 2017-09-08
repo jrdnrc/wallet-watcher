@@ -16,12 +16,15 @@
                 <span class="btn btn-primary" data-toggle="modal" data-target="#new-wallet-modal">New Wallet</span>
             </div>
 
-            <div class="col-xs-7 col-md-4" v-for="w in wallets">
-                <wallet :wallet_id="w.wallet_id"
-                        :name="w.name"
-                        :balance="w.balance"
-                        :addresses="w.addresses" />
-            </div>
+            <draggable v-model="wallets">
+                <div class="col-xs-7 col-md-4" v-for="w in wallets">
+                    <wallet :wallet_id="w.wallet_id"
+                            :name="w.name"
+                            :balance="w.balance"
+                            :addresses="w.addresses"
+                            v-on:wallet-removed="removeWallet(w.wallet_id)"/>
+                </div>
+            </draggable>
         </div>
 
         <add-wallet v-on:wallet-added="fetchWallets" />
