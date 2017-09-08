@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class Wallet extends Model
 {
@@ -42,5 +43,13 @@ class Wallet extends Model
     public function watch(string $address) : void
     {
         $this->addresses()->save(new Address(['address' => $address]));
+    }
+
+    /**
+     * @param Collection $addresses
+     */
+    public function setAddressesAttribute(Collection $addresses)
+    {
+        $this->attributes['addresses'] = $addresses->pluck('address');
     }
 }
