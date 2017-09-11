@@ -44,12 +44,4 @@ class Wallet extends Model
     {
         $this->addresses()->save(new Address(['address' => $address]));
     }
-
-    /**
-     * @param Collection $addresses
-     */
-    public function setAddressesAttribute(Collection $addresses)
-    {
-        $this->attributes['addresses'] = $addresses->pluck('address');
-    }
 }
