@@ -1,10 +1,11 @@
 <template>
     <div class="thumbnail">
         <span class="pull-right"><button class="btn btn-danger btn-xs" v-on:click="remove">&times;</button></span>
-        <h3>{{ name }}</h3>
-        <span><strong>Balance: </strong> &#3647;{{ balance }}</span>
+        <h3>{{ mutableWallet.name }}</h3>
+        <span><strong>Balance: </strong> &#3647;{{ mutableWallet.balance }}</span><br />
+        <span><strong>Fiat:</strong> &pound;{{ mutableWallet.fiat }}</span>
         <ul class="list-group">
-            <li class="list-group-item" v-for="a in addresses">
+            <li class="list-group-item" v-for="a in mutableWallet.addresses">
                 <a :href="'//blockchain.info/address/' + a" target="_blank">
                     {{ a }}
                 </a>
@@ -25,13 +26,21 @@
 </template>
 
 <script>
+    import Blockchain from './../lib/blockchain'
+    import { pipes } from './../lib/blockchain'
+
     export default {
-        props: ['wallet_id', 'name', 'balance', 'addresses'],
+        props: ['wallet'],
 
         data: function () {
             return {
-                newAddress: ''
+                newAddress: '',
+                mutableWallet: Object.assign({}, { balance: 0, fiat: 0 }, this.wallet)
             }
+        },
+
+        mounted: function () {
+            this.fetchBalances()
         },
 
         methods: {
@@ -42,9 +51,24 @@
                 })
             },
 
+            fetchBalances: function () {
+                const mutateWallet = fields => Object.assign({}, this.mutableWallet, fields)
+
+                Blockchain.addressBalance(...this.mutableWallet.addresses)
+                    .then(pipes.JSON)
+                    .then(r => {
+                        this.mutableWallet = mutateWallet({balance: r.wallet.final_balance / Math.pow(10, 8)})
+
+                        Blockchain
+                            .fiat(r.wallet.final_balance)
+                            .then(pipes.TEXT)
+                            .then(r => this.mutableWallet = mutateWallet({fiat: r}))
+                    })
+            },
+
             remove: function () {
-                axios.delete(`/wallet/${this.wallet_id}`).then(() => {
-                    this.$emit('wallet-removed', { wallet_id: this.wallet_id })
+                axios.delete(`/wallet/${this.wallet.wallet_id}`).then(() => {
+                    this.$emit('wallet-removed', { wallet_id: this.wallet.wallet_id })
                 })
             }
         }

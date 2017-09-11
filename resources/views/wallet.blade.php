@@ -17,12 +17,8 @@
             </div>
 
             <draggable v-model="wallets">
-                <div class="col-xs-7 col-md-4" v-for="w in wallets">
-                    <wallet :wallet_id="w.wallet_id"
-                            :name="w.name"
-                            :balance="w.balance"
-                            :addresses="w.addresses"
-                            v-on:wallet-removed="removeWallet(w.wallet_id)"/>
+                <div class="col-xs-7 col-md-4" v-for="w in wallets" :key="w.wallet_id">
+                    <wallet :wallet="w" v-on:wallet-removed="removeWallet(w.wallet_id)" />
                 </div>
             </draggable>
         </div>
