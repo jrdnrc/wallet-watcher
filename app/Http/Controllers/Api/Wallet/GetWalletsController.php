@@ -34,10 +34,10 @@ final class GetWalletsController extends Controller
         $wallets = Wallet::all(['wallet_id', 'name'])
             ->each(
                 function ($wallet) {
-                    $wallet->addresses = Address::where('wallet_id', $wallet->wallet_id)->get(['address']);
+                    $wallet->addresses = Address::where('wallet_id', $wallet->wallet_id)->addresses();
                     $wallet->balance   = $wallet->addresses->sum(
                         function ($address) {
-                            return $this->blockchain->Explorer->getAddress($address)->final_balance;
+                            return (float) $this->blockchain->Explorer->getAddress($address)->final_balance;
                         }
                     );
 
