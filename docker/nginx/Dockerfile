@@ -13,4 +13,6 @@ RUN apk update \
 
 CMD ["nginx"]
 
+WORKDIR /var/www
+
 EXPOSE 443
