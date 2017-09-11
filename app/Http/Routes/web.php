@@ -17,13 +17,7 @@ $router->group(
     }
 );
 
-$router->group(
-    [
-        'prefix' => 'app',
-    ],
-    function (Router $router) {
-        $router->get('/', function () {
-            return view('wallet');
-        });
-    }
-);
+
+$router->get('/', function () {
+    return view('wallet');
+});
