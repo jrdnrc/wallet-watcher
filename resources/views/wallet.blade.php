@@ -23,7 +23,7 @@
             </draggable>
         </div>
 
-        <add-wallet v-on:wallet-added="fetchWallets" />
+        <add-wallet v-on:wallet-added="fetchWalletsFromApi" />
     </div>
 
 </div>

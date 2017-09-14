@@ -45,25 +45,25 @@
 
         methods: {
             addAddress: function () {
-                axios.post(`/wallet/${this.wallet_id}/address`, { address: this.newAddress }).then(() => {
+                this.mutableWallet.addresses.push(this.newAddress)
+                this.fetchBalances()
+
+                axios.post(`/wallet/${this.wallet.wallet_id}/address`, { address: this.newAddress }).then(() => {
                     this.$refs.newAddress.blur()
                     this.newAddress = ''
                 })
             },
 
             fetchBalances: function () {
+                if (this.mutableWallet.addresses.length == 0) {
+                    return
+                }
+
                 const mutateWallet = fields => Object.assign({}, this.mutableWallet, fields)
 
-                Blockchain.addressBalance(...this.mutableWallet.addresses)
-                    .then(pipes.JSON)
-                    .then(r => {
-                        this.mutableWallet = mutateWallet({balance: r.wallet.final_balance / Math.pow(10, 8)})
-
-                        Blockchain
-                            .fiat(r.wallet.final_balance)
-                            .then(pipes.TEXT)
-                            .then(r => this.mutableWallet = mutateWallet({fiat: r}))
-                    })
+                Blockchain
+                    .addressBalance(...this.mutableWallet.addresses)
+                    .then(r => this.mutableWallet = mutateWallet({ balance: r.data.balance, fiat: r.data.fiat }))
             },
 
             remove: function () {

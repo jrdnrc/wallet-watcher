@@ -35,8 +35,12 @@ const app = new Vue({
     },
 
     methods: {
-        fetchWallets: function () {
+        clearWallets: function () {
             this.wallets.length = 0
+        },
+
+        fetchWallets: function () {
+            this.clearWallets()
 
             if (this.$cookie.get('wallets')) {
                 this.wallets = JSON.parse(this.$cookie.get('wallets'))
@@ -46,6 +50,8 @@ const app = new Vue({
         },
 
         fetchWalletsFromApi: function () {
+            this.clearWallets()
+
             const pushToWallets = response => response.data.forEach(wallet => this.wallets.push(wallet))
 
             axios('/wallet')
@@ -62,6 +68,8 @@ const app = new Vue({
 
         removeWallet: function (wallet_id) {
             this.wallets = this.wallets.filter(w => w.wallet_id !== wallet_id)
+
+            this.saveWallets();
         },
 
         saveWallets: function () {
