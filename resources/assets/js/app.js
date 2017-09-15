@@ -6,9 +6,10 @@
  */
 require('./bootstrap');
 
-const Vue = require('vue')
-const axios = require('axios')
-const sprintf = require('sprintf')
+import Vue from 'vue'
+import Vuex from 'vuex'
+import axios from 'axios'
+import sprintf from 'sprintf'
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -17,15 +18,31 @@ const sprintf = require('sprintf')
  */
 
 Vue.use(require('vue-cookie'))
+Vue.use(Vuex)
 
 Vue.component('wallet', require('./components/Wallet.vue'));
 Vue.component('add-wallet', require('./components/NewWallet.vue'))
 Vue.component('draggable', require('vuedraggable'))
 
+const store = new Vuex.Store({
+    state: {
+        wallets: []
+    },
+
+    mutations: {
+        addWallet (state, wallet) {
+            state.wallets.push(wallet)
+        }
+    }
+})
+
 const app = new Vue({
     el: '#app',
 
+    store,
+
     mounted: function () {
+        console.log(this.$store.state)
         this.fetchWallets()
     },
 
@@ -56,7 +73,6 @@ const app = new Vue({
 
             axios('/wallet')
                 .then(pushToWallets)
-                .then(this.saveWallets)
                 .catch(error => console.log(error))
         },
 
@@ -68,16 +84,6 @@ const app = new Vue({
 
         removeWallet: function (wallet_id) {
             this.wallets = this.wallets.filter(w => w.wallet_id !== wallet_id)
-
-            this.saveWallets();
-        },
-
-        saveWallets: function () {
-            this.$cookie.set('wallets', JSON.stringify(this.wallets.map(w => Object.assign({}, {
-                wallet_id: w.wallet_id,
-                name:      w.name,
-                addresses: w.addresses
-            }))))
         }
     },
 
@@ -88,6 +94,12 @@ const app = new Vue({
 
         wallets: function (val) {
             this.updateTitle()
+
+            this.$cookie.set('wallets', JSON.stringify(val.map(w => Object.assign({}, {
+                wallet_id: w.wallet_id,
+                name:      w.name,
+                addresses: w.addresses
+            }))))
         }
     }
 });
