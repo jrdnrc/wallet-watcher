@@ -1,11 +1,11 @@
 <template>
     <div class="thumbnail">
         <span class="pull-right"><button class="btn btn-danger btn-xs" v-on:click="remove">&times;</button></span>
-        <h3>{{ mutableWallet.name }}</h3>
-        <span><strong>Balance: </strong> &#3647;{{ mutableWallet.balance }}</span><br />
-        <span><strong>Fiat:</strong> &pound;{{ mutableWallet.fiat }}</span>
+        <h3>{{ wallet.name }}</h3>
+        <span><strong>Balance: </strong> &#3647;{{ wallet.balance }}</span><br />
+        <span><strong>Fiat:</strong> &pound;{{ wallet.fiat }}</span>
         <ul class="list-group">
-            <li class="list-group-item" v-for="a in mutableWallet.addresses">
+            <li class="list-group-item" v-for="a in wallet.addresses">
                 <a :href="'//blockchain.info/address/' + a" target="_blank">
                     {{ a }}
                 </a>
@@ -27,15 +27,15 @@
 
 <script>
     import Blockchain from './../lib/blockchain'
-    import { pipes } from './../lib/blockchain'
+    import { mapMutations } from 'vuex'
+    import { walletById } from './../lib/wallet/repository'
 
     export default {
-        props: ['wallet'],
+        props: ['wallet_id'],
 
         data: function () {
             return {
-                newAddress: '',
-                mutableWallet: Object.assign({}, { balance: 0, fiat: 0 }, this.wallet)
+                newAddress: ''
             }
         },
 
@@ -44,32 +44,44 @@
         },
 
         methods: {
-            addAddress: function () {
-                this.mutableWallet.addresses.push(this.newAddress)
-                this.fetchBalances()
+            ...mapMutations([
+                'addAddressToWallet',
+                'updateWalletBalance',
+            ]),
 
-                axios.post(`/wallet/${this.wallet.wallet_id}/address`, { address: this.newAddress }).then(() => {
-                    this.$refs.newAddress.blur()
-                    this.newAddress = ''
+            addAddress: function () {
+                const address = this.newAddress
+                this.$refs.newAddress.blur()
+                this.newAddress = ''
+                this.addAddressToWallet({ walletId: this.wallet_id, address })
+
+                axios.post(`/wallet/${this.wallet_id}/address`, { address }).then(() => {
+                    this.fetchBalances()
                 })
             },
 
             fetchBalances: function () {
-                if (this.mutableWallet.addresses.length == 0) {
+                if (this.wallet.addresses.length == 0) {
                     return
                 }
 
-                const mutateWallet = fields => Object.assign({}, this.mutableWallet, fields)
-
                 Blockchain
-                    .addressBalance(...this.mutableWallet.addresses)
-                    .then(r => this.mutableWallet = mutateWallet({ balance: r.data.balance, fiat: r.data.fiat }))
+                    .addressBalance(...this.wallet.addresses)
+                    .then(r => this.updateWalletBalance({ walletId: this.wallet_id, balance: r.data.balance, fiat: r.data.fiat }))
             },
 
             remove: function () {
-                axios.delete(`/wallet/${this.wallet.wallet_id}`).then(() => {
-                    this.$emit('wallet-removed', { wallet_id: this.wallet.wallet_id })
+                axios.delete(`/wallet/${this.wallet_id}`).then(() => {
+                    this.$emit('wallet-removed', { wallet_id: this.wallet_id })
                 })
+            }
+        },
+
+        computed: {
+            wallet: {
+                get () {
+                    return this.$store.state.wallets.find(walletById(this.wallet_id))
+                }
             }
         }
     }
